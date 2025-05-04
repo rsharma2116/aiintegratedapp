@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background: #333;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+  display: flex;
+  align-items: center;
+}
+
+.ai-logo {
+  width: 48px;
+  height: 48px;
+  margin-right: 12px;
+}
+
+header h2 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.user-icon {
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  background-color: white;
+}
+
+
+    .user-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      z-index: 1000;
+      width: 180px;
+    }
+
+    .user-menu ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .user-menu li {
+      border-bottom: 1px solid #eee;
+    }
+
+    .user-menu li:last-child {
+      border-bottom: none;
+    }
+
+    .user-menu button {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .user-menu button:hover {
+      background-color: #f5f5f5;
+    }
+
+    #creditCounter {
+      padding: 10px 20px;
+      background: #e0e0e0;
+      font-weight: bold;
+    }
+
+    main#chatContainer {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+      background: white;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      clear: both;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .message.user {
+      background-color: #d9efff;
+      float: left;
+      text-align: left;
+    }
+
+    .message.ai {
+      background-color: #ffffff;
+      float: right;
+      text-align: left;
+      border: 1px solid #ddd;
+      position: relative;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      background-color: black;
+      width: 2px;
+      height: 1.5em;
+      margin-left: 2px;
+      animation: blink 0.8s infinite step-end;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    #chatForm {
+      display: flex;
+      padding: 10px 20px;
+      background: #fafafa;
+      border-top: 1px solid #ccc;
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    #chatForm input {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      margin-right: 10px;
+    }
+
+    #chatForm button {
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #upgradeModal {
+      display: none;
+      position: fixed;
+      top: 0; 
+      left: 0;
+      width: 100%; 
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #upgradeModal .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+      text-align: center;
+      position: relative;
+    }
+
+    #upgradeModal button {
+      padding: 8px 16px;
+      margin-top: 10px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #closeModal {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-title">
+      <img src="/resources/ai_icon.png" alt="AI Logo" class="ai-logo" />
+      <h2>AI Chat</h2>
+    </div>
+    <img src="/resources/user.png" alt="User Icon" class="user-icon" id="userIcon" />
+    <div class="user-menu" id="userMenu">
+      <ul>
+        <li><button id="upgradePlanBtn">Upgrade Plan</button></li>
+        <li><button id="logoutBtn">Logout</button></li>
+      </ul>
+    </div>
+  </header>
+
+  <div id="creditCounter">Credits: 20</div>
+  <main id="chatContainer"></main>
+
+  <form id="chatForm">
+    <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off" required />
+    <button type="submit">Send</button>
+  </form>
+
+  <!-- Upgrade Modal -->
+  <div id="upgradeModal">
+    <div class="modal-content">
+      <button id="closeModal">×</button>
+      <h3>Upgrade Plan</h3>
+      <p>You've used most of your free credits. Upgrade now for uninterrupted access.</p>
+      <button>Upgrade</button>
+    </div>
+  </div>
+
+  <script>
+    const chatContainer = document.getElementById('chatContainer');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('userInput');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const creditCounter = document.getElementById('creditCounter');
+    const maxCredits = 20;
+    const costPerChat = 2;
+    const warningThreshold = 0.6;
+
+    const upgradeBtn = document.getElementById('upgradePlanBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const upgradeModal = document.getElementById('upgradeModal');
+    const closeModal = document.getElementById('closeModal');
+
+    const userIcon = document.getElementById("userIcon");
+    const userMenu = document.getElementById("userMenu");
+
+    let remainingCredits = parseInt(localStorage.getItem("credits")) || maxCredits;
+    updateCreditDisplay();
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (remainingCredits < costPerChat) {
+        disableChat();
+        appendMessage("System", "Insufficient credits. Please upgrade.", "ai");
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (remainingCredits < costPerChat) {
+        appendMessage("System", "Insufficient credits. Please upgrade.", "ai");
+        disableChat();
+        showUpgradeModal();
+        return;
+      }
+
+      const message = input.value.trim();
+      if (!message) return;
+
+      input.value = '';
+      appendMessage('You', message, 'user');
+
+      const loadingMsg = appendMessage('AI', 'Thinking...', 'ai');
+      submitBtn.disabled = true;
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          window.location.href = "/login";
+          return;
+        }
+
+        const response = await fetch("/api/chat/", {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "AI unavailable");
+
+        loadingMsg.innerHTML = `<strong>AI:</strong> <span class="typing-text"></span><span class="typing-cursor"></span>`;
+        const typingSpan = loadingMsg.querySelector(".typing-text");
+        const typingCursor = loadingMsg.querySelector(".typing-cursor");
+        let i = 0;
+        const replyText = data.reply;
+        const typingInterval = setInterval(() => {
+          typingSpan.textContent += replyText.charAt(i);
+          i++;
+          if (i >= replyText.length) {
+            clearInterval(typingInterval);
+            typingCursor.style.display = "none";
+          }
+        }, 30);
+
+        const previousCredits = remainingCredits;
+        remainingCredits -= costPerChat;
+        localStorage.setItem("credits", remainingCredits);
+        updateCreditDisplay();
+
+        if ((previousCredits > maxCredits * warningThreshold && 
+             remainingCredits <= maxCredits * warningThreshold) || 
+            remainingCredits === 0) {
+          showUpgradeModal();
+        }
+
+        if (remainingCredits < costPerChat) {
+          disableChat();
+          appendMessage("System", "You're out of credits. Please upgrade.", "ai");
+        }
+
+      } catch (error) {
+        console.error("Chat error:", error);
+        loadingMsg.innerHTML = `<strong>Error:</strong> ${error.message}`;
+      } finally {
+        submitBtn.disabled = false;
+        input.focus();
+      }
+    });
+
+    function appendMessage(sender, text, type = 'ai') {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${type}`;
+      msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      chatContainer.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return msgDiv;
+    }
+
+    function updateCreditDisplay() {
+      creditCounter.textContent = `Credits: ${remainingCredits}`;
+    }
+
+    function disableChat() {
+      input.disabled = true;
+      submitBtn.disabled = true;
+    }
+
+    function showUpgradeModal() {
+      upgradeModal.style.display = 'flex';
+    }
+
+    userIcon.addEventListener("click", () => {
+      userMenu.style.display = userMenu.style.display === "none" ? "block" : "none";
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      window.location.href = "/login";
+    });
+
+    closeModal.addEventListener('click', () => {
+      upgradeModal.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
