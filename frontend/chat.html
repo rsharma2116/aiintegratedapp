@@ -16,40 +16,44 @@
     }
 
     header {
-      background: #333;
+      background: #004aad;
       color: white;
       padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
     }
 
     .header-title {
-  display: flex;
-  align-items: center;
-}
+      display: flex;
+      align-items: center;
+    }
 
-.ai-logo {
-  width: 48px;
-  height: 48px;
-  margin-right: 12px;
-}
+    .ai-logo {
+      width: 48px;
+      height: 48px;
+      margin-right: 12px;
+      background-color: white;
+      border-radius: 8px;
+      padding: 5px;
+    }
 
-header h2 {
-  font-size: 28px;
-  margin: 0;
-}
+    header h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0;
+    }
 
-.user-icon {
-  cursor: pointer;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid #ccc;
-  background-color: white;
-}
-
+    .user-icon {
+      cursor: pointer;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+      background-color: #cfe6ff;
+    }
 
     .user-menu {
       display: none;
@@ -210,9 +214,80 @@ header h2 {
       font-size: 20px;
       cursor: pointer;
     }
+
+    .about-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      z-index: 3000;
+      padding: 20px;
+      display: none;
+    }
+
+    .about-modal.active {
+      display: block;
+    }
+
+    .about-header {
+      text-align: center;
+    }
+
+    .about-header h1 {
+      color: #004aad;
+      margin-bottom: 0.5rem;
+    }
+
+    .about-header h2 {
+      color: #0077cc;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .about-description,
+    .section-content {
+      color: #444;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-weight: bold;
+      color: #004aad;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .architecture-diagram {
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .close-btn {
+      background: #ccc;
+      color: #333;
+      padding: 8px 16px;
+      border-radius: 6px;
+      float: right;
+      margin-top: -10px;
+      margin-right: -10px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      background: #999;
+    }
   </style>
 </head>
-
 <body>
   <header>
     <div class="header-title">
@@ -224,6 +299,7 @@ header h2 {
       <ul>
         <li><button id="upgradePlanBtn">Upgrade Plan</button></li>
         <li><button id="logoutBtn">Logout</button></li>
+        <li><button id="aboutBtn">About</button></li>
       </ul>
     </div>
   </header>
@@ -235,6 +311,24 @@ header h2 {
     <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off" required />
     <button type="submit">Send</button>
   </form>
+
+  <!-- ✅ About Modal -->
+  <div class="about-modal" id="aboutModal">
+    <div class="close-btn" onclick="toggleAbout()">×</div>
+    <div class="about-header">
+      <img src="/resources/about_us.jpg" alt="About Us" style="max-width: 250px; height: auto; display: block; margin: 0 auto 1rem auto;" />
+      <h2>Passion. Innovation. Excellence.</h2>
+    </div>
+    <div class="about-description">
+      Hi, My name is Ravi Sharma, student of MSc in Cloud Computing. This is the part of my assessment.
+    </div>
+    <div class="section-title">API Design Justification</div>
+    <div class="section-content">
+      In today's digital era, artificial intelligence (AI) has become a transformative force, enabling intelligent, real-time user interactions across platforms. Our application leverages this power by allowing users to register, log in, and engage in meaningful conversations with an AI system through a chat interface. Upon logging in, users are allocated a certain number of credit points that govern their ability to ask questions—each interaction deducts two points. These user messages are sent to an AI model via the Hugging Face API, which processes and returns insightful responses. The system logs both user inputs and AI outputs for transparency and performance monitoring. As credits diminish, the system alerts users through pop-ups, prompting them to recharge via a structured and secure planning interface; once the balance hits zero, a recharge becomes mandatory to continue. This integration of AI not only enhances user experience but also introduces a controlled usage model that ensures fair and efficient access. Looking ahead, the system holds promising potential for future upgrades such as personalized responses, voice interaction, multilingual support, and deeper integrations, ultimately helping users access intelligent assistance anytime, anywhere.
+    </div>
+    <div class="section-title">System Architecture</div>
+    <img src="/resources/system architecture.png" class="architecture-diagram" alt="System Architecture Diagram" />
+  </div>
 
   <!-- Upgrade Modal -->
   <div id="upgradeModal">
@@ -377,11 +471,17 @@ header h2 {
       userMenu.style.display = userMenu.style.display === "none" ? "block" : "none";
     });
 
+    function toggleAbout() {
+      document.getElementById("aboutModal").classList.toggle("active");
+    }
+
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('token');
       localStorage.removeItem('username');
       window.location.href = "/login";
     });
+
+    document.getElementById("aboutBtn").addEventListener("click", toggleAbout);
 
     closeModal.addEventListener('click', () => {
       upgradeModal.style.display = 'none';
