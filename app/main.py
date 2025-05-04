@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database.connection import Base, engine, get_db
 from app import models
 from app.schemas import UserCreate, UserLogin
-from app.models import User
+from app.models.User import User
 from app.utils import get_password_hash, verify_password, create_access_token
 import os
 from fastapi.security import OAuth2PasswordBearer
@@ -20,7 +20,7 @@ load_dotenv()
 app = FastAPI()
 
 
-app.mount("/resources", StaticFiles(directory="C:/AI WEB APP 1/resources"), name="resources")
+app.mount("/resources", StaticFiles(directory="C:/Users/Administrator/Desktop/submission/CloudDevelopment/resources"), name="resources")
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
